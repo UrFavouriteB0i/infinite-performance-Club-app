@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabase'; // Adjust path if necessary
+import { supabase } from '../lib/supabase';
 
-// Define your TypeScript interface for the player data
 interface Player {
   id: string;
   name: string;
@@ -21,33 +20,28 @@ const VerifiedBadge = () => (
   </span>
 );
 
-
 export default function LeaderboardPage() {
-  // database player flag
   const [playersData, setPlayersData] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [theme, setTheme] = useState('dark');
   const [activeRegion, setActiveRegion] = useState('Tangerang');
-  const [activeSport, setActiveSport] = useState('Tennis'); // Add this line
+  const [activeSport, setActiveSport] = useState('Tennis'); 
   const [searchQuery, setSearchQuery] = useState('');
   const [currentRankPanel, setCurrentRankPanel] = useState(0);
 
-  // Search expand states
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleSearch = () => {
     setIsSearchExpanded(!isSearchExpanded);
     if (!isSearchExpanded) {
-      // Small delay to allow CSS transition to start before focusing
       setTimeout(() => searchInputRef.current?.focus(), 50); 
     } else {
-      setSearchQuery(''); // Optional: clear search if closed
+      setSearchQuery(''); 
     }
   };
   
-  // Swipe logic states
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -60,7 +54,7 @@ export default function LeaderboardPage() {
         const { data, error } = await supabase
           .from('players')
           .select('*')
-          .order('points', { ascending: false }); // Sort by points immediately
+          .order('points', { ascending: false });
 
         if (error) throw error;
         
@@ -77,12 +71,9 @@ export default function LeaderboardPage() {
     fetchPlayers();
   }, []);
 
-  // Theme effect
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
-
-  
 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
@@ -94,11 +85,10 @@ export default function LeaderboardPage() {
   };
 
   const switchRank = (index: number) => {
-    if (index !== 0) return; // only beginner unlocked
+    if (index !== 0) return; 
     setCurrentRankPanel(index);
   };
 
-  // Touch swipe handling
   const handleTouchStart = (e: React.TouchEvent) => {
     setStartX(e.touches[0].clientX);
     setStartY(e.touches[0].clientY);
@@ -123,7 +113,7 @@ export default function LeaderboardPage() {
     if (containerRef.current) {
       const threshold = containerRef.current.offsetWidth * 0.25;
       if (currentX < -threshold && currentRankPanel < 2) {
-        // snap back
+        // Handle next panel logic when unlocked
       } else if (currentX > threshold && currentRankPanel > 0) {
         setCurrentRankPanel(prev => prev - 1);
       }
@@ -131,11 +121,9 @@ export default function LeaderboardPage() {
     setCurrentX(0);
   };
 
-  // LEADERBOARD RENDER LOGIC
   const query = searchQuery.toLowerCase().trim();
   
-  let players = playersData
-    .filter(p => p.region === activeRegion);
+  let players = playersData.filter(p => p.region === activeRegion);
 
   if (query) {
     players = players.filter(p => p.name.toLowerCase().includes(query));
@@ -147,13 +135,12 @@ export default function LeaderboardPage() {
   const rest7 = top10.slice(3);
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div className="min-h-screen overflow-x-hidden w-full relative">
+      <div className="max-w-[1120px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
 
         {/* ═══════════ HEADER ═══════════ */}
         <header className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* LOGO */}
             <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0">
               <img src="./iP logo.jpg" alt="Infinite Performance Logo" className="w-full h-full object-contain" />
             </div>
@@ -164,7 +151,6 @@ export default function LeaderboardPage() {
               <p className="font-display text-sm sm:text-lg tracking-widest" style={{ color: 'var(--orange-primary)' }}>LEADERBOARD</p>
             </div>
           </div>
-          {/* Theme Toggle */}
           <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             <div className="knob">
               {theme === 'dark' ? (
@@ -183,93 +169,51 @@ export default function LeaderboardPage() {
           </button>
         </header>
 
-        {/* Subheader Badge */}
         <div className="mb-8 flex justify-center sm:justify-start">
           <div className="inline-flex items-center gap-2 rounded-full px-5 py-2" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange-primary)" strokeWidth="2" strokeLinecap="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--text-secondary)' }}>The Official Rankings of the IP Club Collective</span>
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--text-secondary)' }}>Official Rankings of the IP Club Collective</span>
           </div>
         </div>
 
-        {/* ═══════════ SPORT CARDS (Level 1) ═══════════ */}
-        {/* ═══════════ SPORT SELECTION (Level 1) ═══════════ */}
-        {/* MOBILE REORDERING WRAPPER */}
         <div className="flex flex-col sm:block">
-          
-          {/* 1. SPORT: First in code (Desktop #1), order-1 on Mobile (#1) */}
+          {/* SPORT */}
           <section className="mb-6 order-1">
-            {/* MOBILE VIEW: Dropdown */}
             <div className="block sm:hidden">
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                Sport
-              </label>
-              <select 
-                value={activeSport} 
-                className="region-dropdown" 
-                onChange={(e) => setActiveSport(e.target.value)}
-              >
+              <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Sport</label>
+              <select value={activeSport} className="region-dropdown" onChange={(e) => setActiveSport(e.target.value)}>
                 <option value="Tennis">Tennis</option>
                 <option value="Padel" disabled>Padel (Coming Soon)</option>
                 <option value="Badminton" disabled>Badminton (Coming Soon)</option>
                 <option value="Pickleball" disabled>Pickleball (Coming Soon)</option>
               </select>
             </div>
-
-            {/* DESKTOP VIEW: Cards */}
             <div className="hidden sm:grid sm:grid-cols-4 gap-3">
               <div className={`sport-card ${activeSport === 'Tennis' ? 'active' : ''}`} onClick={() => setActiveSport('Tennis')}>
-                <div 
-                  className="mx-auto mb-2 w-7 h-7"
-                  style={{
-                    backgroundColor: activeSport === 'Tennis' ? 'var(--orange-primary)' : 'var(--text-muted)',
-                    WebkitMask: 'url(/tennis.svg) center/contain no-repeat',
-                    mask: 'url(/tennis.svg) center/contain no-repeat'
-                  }}
-                />
+                <div className="mx-auto mb-2 w-7 h-7" style={{ backgroundColor: activeSport === 'Tennis' ? 'var(--orange-primary)' : 'var(--text-muted)', WebkitMask: 'url(/tennis.svg) center/contain no-repeat', mask: 'url(/tennis.svg) center/contain no-repeat' }} />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Tennis</p>
               </div>
               <div className="sport-card locked">
-                <div 
-                  className="mx-auto mb-2 w-7 h-7"
-                  style={{
-                    backgroundColor: activeSport === 'Padel' ? 'var(--orange-primary)' : 'var(--text-muted)',
-                    WebkitMask: 'url(/padel.svg) center/contain no-repeat',
-                    mask: 'url(/padel.svg) center/contain no-repeat'
-                  }}
-                />
+                <div className="mx-auto mb-2 w-7 h-7" style={{ backgroundColor: activeSport === 'Padel' ? 'var(--orange-primary)' : 'var(--text-muted)', WebkitMask: 'url(/padel.svg) center/contain no-repeat', mask: 'url(/padel.svg) center/contain no-repeat' }} />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Padel</p>
                 <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
               </div>
               <div className="sport-card locked">
-                <div 
-                  className="mx-auto mb-2 w-7 h-7"
-                  style={{
-                    backgroundColor: activeSport === 'Badminton' ? 'var(--orange-primary)' : 'var(--text-muted)',
-                    WebkitMask: 'url(/badminton.svg) center/contain no-repeat',
-                    mask: 'url(/badminton.svg) center/contain no-repeat'
-                  }}
-                />
+                <div className="mx-auto mb-2 w-7 h-7" style={{ backgroundColor: activeSport === 'Badminton' ? 'var(--orange-primary)' : 'var(--text-muted)', WebkitMask: 'url(/badminton.svg) center/contain no-repeat', mask: 'url(/badminton.svg) center/contain no-repeat' }} />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Badminton</p>
                 <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
               </div>
               <div className="sport-card locked">
-                <div 
-                  className="mx-auto mb-2 w-7 h-7"
-                  style={{
-                    backgroundColor: activeSport === 'Pickleball' ? 'var(--orange-primary)' : 'var(--text-muted)',
-                    WebkitMask: 'url(/pickleball.svg) center/contain no-repeat',
-                    mask: 'url(/pickleball.svg) center/contain no-repeat'
-                  }}
-                />
+                <div className="mx-auto mb-2 w-7 h-7" style={{ backgroundColor: activeSport === 'Pickleball' ? 'var(--orange-primary)' : 'var(--text-muted)', WebkitMask: 'url(/pickleball.svg) center/contain no-repeat', mask: 'url(/pickleball.svg) center/contain no-repeat' }} />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Pickleball</p>
                 <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
               </div>
             </div>
           </section>
 
-          {/* 2. SCOPE CARDS: Second in code (Desktop #2), order-3 on Mobile (#3) */}
+          {/* SCOPE */}
           <section className="mb-6 order-3">
             <div className="flex gap-3">
               <div className="scope-card active">
@@ -283,7 +227,7 @@ export default function LeaderboardPage() {
             </div>
           </section>        
 
-          {/* 3. REGION DROPDOWN: Third in code (Desktop #3), order-2 on Mobile (#2) */}
+          {/* REGION */}
           <section className="mb-6 order-2">
             <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Region</label>
             <select value={activeRegion} className="region-dropdown" onChange={selectRegion}>
@@ -295,20 +239,65 @@ export default function LeaderboardPage() {
             </select>
           </section>
 
-          {/* 4. RANK TABS: Fourth in code (Desktop #4), order-4 on Mobile (#4) */}
-          <section className="mb-6 order-4">
-            <div className="rank-tabs-bar mb-0">
-              <button className={`rank-tab-btn ${currentRankPanel === 0 ? 'active' : ''}`} onClick={() => switchRank(0)}>Beginner</button>
-              <button className="rank-tab-btn locked">Intermediate <span className="badge-soon ml-1" style={{ fontSize: '7px' }}>Soon</span></button>
-              <button className="rank-tab-btn locked">Advanced <span className="badge-soon ml-1" style={{ fontSize: '7px' }}>Soon</span></button>
+          {/* FIX #3: Minimalist Rank Tabs */}
+          <section className="mb-4 order-4 w-full">
+            <div className="flex gap-4 sm:gap-6 border-b border-[var(--border-color)] overflow-x-auto whitespace-nowrap hide-scrollbar w-full">
+              <button 
+                className={`relative pb-3 text-sm font-heading tracking-wide transition-colors ${currentRankPanel === 0 ? 'text-[var(--text-primary)] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'}`}
+                onClick={() => switchRank(0)}
+              >
+                Beginner
+                {currentRankPanel === 0 && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 rounded-t-sm" style={{ backgroundColor: 'var(--orange-primary)' }}></span>
+                )}
+              </button>
+              <button className="relative pb-3 text-sm font-heading font-medium text-[var(--text-muted)] cursor-not-allowed">
+                Intermediate <span className="badge-soon ml-1" style={{ fontSize: '9px' }}>Soon</span>
+              </button>
+              <button className="relative pb-3 text-sm font-heading font-medium text-[var(--text-muted)] cursor-not-allowed">
+                Advanced <span className="badge-soon ml-1" style={{ fontSize: '9px' }}>Soon</span>
+              </button>
             </div>
           </section>
         </div>
 
-        {/* Swipable Panels */}
+        {/* FIX #2: Search Bar Moved Outside Swipe Container with Tight Margin */}
+        <div className="mb-2 flex justify-start sm:justify-end h-10">
+          <div className={`group flex items-center transition-all duration-300 ease-in-out border-b-2 
+              ${isSearchExpanded ? 'w-full border-[var(--orange-primary)]' : 'w-8 border-transparent'}
+              sm:w-72 sm:border-[var(--border-color)] sm:opacity-50 sm:hover:opacity-100 sm:focus-within:opacity-100 sm:focus-within:border-[var(--orange-primary)]
+            `}
+          >
+            <button onClick={toggleSearch} className={`p-1 shrink-0 transition-colors ${isSearchExpanded ? 'text-[var(--orange-primary)]' : 'text-[var(--text-muted)]'} sm:text-[var(--text-muted)] sm:group-focus-within:text-[var(--orange-primary)]`} aria-label="Toggle search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+            <input 
+              ref={searchInputRef}
+              type="text" 
+              placeholder="Search name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`bg-transparent outline-none text-sm font-body transition-all duration-300 
+                ${isSearchExpanded ? 'w-full opacity-100 ml-2 px-1' : 'w-0 opacity-0 p-0'}
+                sm:w-full sm:opacity-100 sm:ml-2 sm:px-1
+              `}
+              style={{ color: 'var(--text-primary)' }}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className={`p-1 shrink-0 transition-colors ${isSearchExpanded ? 'block' : 'hidden sm:block'}`} style={{ color: 'var(--text-muted)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* FIX #1: Loading State wrapping the list to prevent hydration bugs */}
         <div 
-          className="swipe-container" 
-          id="swipe-container"
+          className="swipe-container w-full overflow-hidden" 
           ref={containerRef}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -316,68 +305,18 @@ export default function LeaderboardPage() {
         >
           <div 
             className="swipe-track" 
-            id="swipe-track"
             style={{
               transform: `translateX(calc(-${currentRankPanel * 100}% + ${currentX}px))`,
               transition: isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            {/* Panel 0: Beginner (active) */}
-            <div className="swipe-panel" id="panel-beginner">
-              {/* Minimalist Expanding Search */}
-              <div className="mb-6 flex justify-start sm:justify-end h-10">
-                <div 
-                  className={`group flex items-center transition-all duration-300 ease-in-out border-b-2 
-                    ${isSearchExpanded ? 'w-full border-[var(--orange-primary)]' : 'w-8 border-transparent'}
-                    sm:w-72 sm:border-[var(--border-color)] sm:opacity-50 sm:hover:opacity-100 sm:focus-within:opacity-100 sm:focus-within:border-[var(--orange-primary)]
-                  `}
-                >
-                  {/* Magnifying Glass Button */}
-                  <button 
-                    onClick={toggleSearch}
-                    className={`p-1 shrink-0 transition-colors ${
-                      isSearchExpanded ? 'text-[var(--orange-primary)]' : 'text-[var(--text-muted)]'
-                    } sm:text-[var(--text-muted)] sm:group-focus-within:text-[var(--orange-primary)]`}
-                    aria-label="Toggle search"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                  </button>
-
-                  {/* Input Field */}
-                  <input 
-                    ref={searchInputRef}
-                    id="search-input" 
-                    type="text" 
-                    placeholder="Search name..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`bg-transparent outline-none text-sm font-body transition-all duration-300 
-                      ${isSearchExpanded ? 'w-full opacity-100 ml-2 px-1' : 'w-0 opacity-0 p-0'}
-                      sm:w-full sm:opacity-100 sm:ml-2 sm:px-1
-                    `}
-                    style={{ color: 'var(--text-primary)' }}
-                  />
-
-                  {/* Quick Clear 'X' Button (Appears when typing) */}
-                  {searchQuery && (
-                    <button 
-                      onClick={() => setSearchQuery('')} 
-                      className={`p-1 shrink-0 transition-colors ${isSearchExpanded ? 'block' : 'hidden sm:block'}`}
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Leaderboard renders here */}
+            <div className="swipe-panel">
               <div id="leaderboard-container">
-                {players.length === 0 ? (
+                {isLoading ? (
+                   <div className="flex justify-center items-center py-16">
+                     <div className="w-8 h-8 border-4 border-[var(--border-color)] border-t-[var(--orange-primary)] rounded-full animate-spin"></div>
+                   </div>
+                ) : players.length === 0 ? (
                   <div id="empty-state" className="text-center py-16">
                     <p className="text-lg font-medium" style={{ color: 'var(--text-muted)' }}>No players found</p>
                     <p className="text-sm mt-1" style={{ color: 'var(--text-muted)', opacity: 0.6 }}>Try adjusting your search or region.</p>
@@ -389,6 +328,7 @@ export default function LeaderboardPage() {
                       <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--orange-primary)' }}>Top {Math.min(10, players.length)} Players</span>
                     </div>
 
+                    {/* TOP 3 */}
                     {top3.length > 0 && (
                       <div className="grid gap-3 mb-3">
                         {top3.map((p, i) => {
@@ -439,6 +379,7 @@ export default function LeaderboardPage() {
                       </div>
                     )}
 
+                    {/* REST OF TOP 10 */}
                     {rest7.length > 0 && (
                       <div className="grid gap-2 mb-8">
                         {rest7.map((p, i) => {
@@ -484,6 +425,7 @@ export default function LeaderboardPage() {
                       </div>
                     )}
 
+                    {/* REST OF FIELD */}
                     {rest.length > 0 && (
                       <>
                         <div className="mb-3 flex items-center gap-3">
@@ -526,7 +468,7 @@ export default function LeaderboardPage() {
               </div>
             </div>
 
-            {/* Panel 1: Intermediate (locked) */}
+            {/* Panel 1: Intermediate */}
             <div className="swipe-panel">
               <div className="locked-panel">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
@@ -537,7 +479,7 @@ export default function LeaderboardPage() {
               </div>
             </div>
 
-            {/* Panel 2: Advanced (locked) */}
+            {/* Panel 2: Advanced */}
             <div className="swipe-panel">
               <div className="locked-panel">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
@@ -550,7 +492,6 @@ export default function LeaderboardPage() {
           </div>
         </div>
 
-        {/* ═══════════ FOOTER ═══════════ */}
         <footer className="mt-14 pt-6 pb-8 text-center" style={{ borderTop: '1px solid var(--border-color)' }}>
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>All rankings verified by the Infinite Performance Committee &middot; Data updated periodically</p>
         </footer>
