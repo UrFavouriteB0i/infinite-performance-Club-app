@@ -174,8 +174,13 @@ export default function LeaderboardPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange-primary)" strokeWidth="2" strokeLinecap="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--text-secondary)' }}>Official Rankings of the IP Club Collective</span>
-          </div>
+            <span 
+              className="text-[10px] sm:text-xs font-semibold tracking-wider sm:tracking-widest uppercase whitespace-nowrap" 
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Official Rankings of the IP Club Collective
+            </span>
+            </div>
         </div>
 
         <div className="flex flex-col sm:block">
@@ -304,14 +309,14 @@ export default function LeaderboardPage() {
           onTouchEnd={handleTouchEnd}
         >
           <div 
-            className="swipe-track" 
+            className="swipe-track flex w-full" 
             style={{
               transform: `translateX(calc(-${currentRankPanel * 100}% + ${currentX}px))`,
               transition: isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <div className="swipe-panel">
-              <div id="leaderboard-container">
+            <div className="swipe-panel px-1.5 py-1">
+              <div id="leaderboard-container" className="w-full">
                 {isLoading ? (
                    <div className="flex justify-center items-center py-16">
                      <div className="w-8 h-8 border-4 border-[var(--border-color)] border-t-[var(--orange-primary)] rounded-full animate-spin"></div>
@@ -338,15 +343,20 @@ export default function LeaderboardPage() {
                           const pointColor = rank === 1 ? 'var(--gold)' : rank === 2 ? 'var(--silver)' : 'var(--bronze)';
 
                           return (
-                            <div key={p.name} className={`lb-card lb-card-top3 ${glowClass} fade-up`} style={{ animationDelay: `${i * 40}ms` }}>
-                              <div className="flex items-center gap-4">
+                            <div key={p.name} className={`lb-card lb-card-top3 ${glowClass} fade-up px-3.5 sm:px-5 py-3`} style={{ animationDelay: `${i * 40}ms` }}>
+                              <div className="flex items-center gap-3 sm:gap-4 w-full">
+                                {/* Rank Badge */}
                                 <div className={`rank-badge rank-lg ${rankClass} shrink-0`}>{rank}</div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="font-heading font-bold text-base truncate" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
+                                
+                                {/* Name Container - added px-1 to prevent hugging card borders */}
+                                <div className="flex-1 min-w-0 px-1">
+                                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
+                                    <span className="font-heading font-bold text-sm sm:text-base truncate block" style={{ color: 'var(--text-primary)' }}>
+                                      {p.name}
+                                    </span>
                                     <VerifiedBadge />
                                   </div>
-                                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.region}</span>
+                                  <span className="text-[11px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>{p.region}</span>
                                 </div>
                                 <div className="hidden sm:flex items-center gap-7 text-right shrink-0">
                                   <div>
@@ -385,12 +395,16 @@ export default function LeaderboardPage() {
                         {rest7.map((p, i) => {
                           const rank = i + 4;
                           return (
-                            <div key={p.name} className="lb-card glow-orange fade-up" style={{ animationDelay: `${(i + 3) * 30}ms` }}>
-                              <div className="flex items-center gap-3">
+                            <div key={p.name} className="lb-card glow-orange fade-up px-3.5 sm:px-4 py-2.5" style={{ animationDelay: `${(i + 3) * 30}ms` }}>
+                              <div className="flex items-center gap-2.5 sm:gap-3 w-full">
                                 <div className="rank-badge rank-md rank-default shrink-0">{rank}</div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-heading font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
+                                
+                                {/* Name Container */}
+                                <div className="flex-1 min-w-0 px-1">
+                                  <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <span className="font-heading font-semibold text-xs sm:text-sm truncate block" style={{ color: 'var(--text-primary)' }}>
+                                      {p.name}
+                                    </span>
                                     <VerifiedBadge />
                                   </div>
                                 </div>
@@ -450,7 +464,7 @@ export default function LeaderboardPage() {
                                 return (
                                   <tr key={p.name} className="fade-up" style={{ animationDelay: `${(i + 10) * 20}ms` }}>
                                     <td className="px-4 py-3"><span className="rank-badge rank-sm rank-default">{rank}</span></td>
-                                    <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>{p.name}</td>
+                                    <td className="px-2 sm:px-4 py-3 font-medium truncate max-w-[120px] sm:max-w-none" style={{ color: 'var(--text-primary)' }}>{p.name}</td>
                                     <td className="text-center px-4 py-3 hidden sm:table-cell">{p.matches}</td>
                                     <td className="text-center px-4 py-3">{p.wins}-{p.losses}</td>
                                     <td className="text-center px-4 py-3 font-semibold" style={{ color: 'var(--text-primary)' }}>{p.points.toLocaleString()}</td>

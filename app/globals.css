@@ -75,10 +75,10 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 
 /* ── CARD GLOWS ── */
-.glow-gold { box-shadow: 0 0 20px var(--gold-glow), inset 0 1px 0 rgba(255,215,0,0.12); border-color: var(--gold) !important; }
-.glow-silver { box-shadow: 0 0 20px var(--silver-glow), inset 0 1px 0 rgba(192,196,204,0.1); border-color: var(--silver) !important; }
-.glow-bronze { box-shadow: 0 0 20px var(--bronze-glow), inset 0 1px 0 rgba(205,127,50,0.1); border-color: var(--bronze) !important; }
-.glow-orange { box-shadow: 0 0 14px var(--orange-glow); border-color: var(--border-color) !important; }
+.glow-gold { box-shadow: 0 0 8px var(--gold-glow), inset 0 1px 0 rgba(255,215,0,0.12); border-color: var(--gold) !important; }
+.glow-silver { box-shadow: 0 0 8px var(--silver-glow), inset 0 1px 0 rgba(192,196,204,0.1); border-color: var(--silver) !important; }
+.glow-bronze { box-shadow: 0 0 8px var(--bronze-glow), inset 0 1px 0 rgba(205,127,50,0.1); border-color: var(--bronze) !important; }
+.glow-orange { box-shadow: 0 0 2px var(--orange-glow); border-color: var(--border-color) !important; }
 
 /* ── RANK BADGES ── */
 .rank-badge {
