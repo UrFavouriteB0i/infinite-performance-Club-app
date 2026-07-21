@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infinite Performance Leaderboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Bebas Neue"', 'system-ui', 'sans-serif'],
+            heading: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+            body: ['"Inter"', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --orange-primary: #F27A1A;
+      --orange-bright: #FF8C2E;
+      --orange-deep: #D46010;
+      --orange-glow: rgba(242, 122, 26, 0.2);
+      --cyan-accent: #00B4D8;
+      --cyan-dim: #0090AD;
+      --red-accent: #FF3D00;
+      --gold: #FFD700;
+      --gold-glow: rgba(255, 215, 0, 0.25);
+      --silver: #C0C4CC;
+      --silver-glow: rgba(192, 196, 204, 0.2);
+      --bronze: #CD7F32;
+      --bronze-glow: rgba(205, 127, 50, 0.2);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0F0F11;
+      --bg-secondary: #17171B;
+      --bg-tertiary: #1E1E24;
+      --bg-elevated: #26262E;
+      --bg-hover: #2E2E38;
+      --border-color: #2A2A34;
+      --border-subtle: #222228;
+      --text-primary: #F0F0F2;
+      --text-secondary: #A0A0AA;
+      --text-muted: #66666E;
+      --text-inverse: #0F0F11;
+      --shadow-card: 0 2px 12px rgba(0,0,0,0.4);
+      --shadow-elevated: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #F4F4F6;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #EAEAEE;
+      --bg-elevated: #FFFFFF;
+      --bg-hover: #E8E8EC;
+      --border-color: #D8D8DE;
+      --border-subtle: #E2E2E8;
+      --text-primary: #18181B;
+      --text-secondary: #5A5A64;
+      --text-muted: #9A9AA4;
+      --text-inverse: #F0F0F2;
+      --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-elevated: 0 8px 32px rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+    /* ── CARD GLOWS ── */
+    .glow-gold { box-shadow: 0 0 20px var(--gold-glow), inset 0 1px 0 rgba(255,215,0,0.12); border-color: var(--gold) !important; }
+    .glow-silver { box-shadow: 0 0 20px var(--silver-glow), inset 0 1px 0 rgba(192,196,204,0.1); border-color: var(--silver) !important; }
+    .glow-bronze { box-shadow: 0 0 20px var(--bronze-glow), inset 0 1px 0 rgba(205,127,50,0.1); border-color: var(--bronze) !important; }
+    .glow-orange { box-shadow: 0 0 14px var(--orange-glow); border-color: var(--border-color) !important; }
+
+    /* ── RANK BADGES ── */
+    .rank-badge {
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 10px; font-family: 'Space Grotesk', system-ui; font-weight: 700;
+    }
+    .rank-lg { width: 44px; height: 44px; font-size: 18px; }
+    .rank-md { width: 36px; height: 36px; font-size: 14px; }
+    .rank-sm { width: 28px; height: 28px; font-size: 12px; border-radius: 7px; }
+    .rank-1 { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1200; }
+    .rank-2 { background: linear-gradient(135deg, #E0E0E0 0%, #A0A0A0 100%); color: #1a1a1a; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%); color: #1a1000; }
+    .rank-default { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+    /* ── TAB STATES ── */
+    .tab-locked { opacity: 0.35; cursor: not-allowed; user-select: none; pointer-events: none; }
+    .badge-soon {
+      font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--bg-elevated); color: var(--text-muted); padding: 2px 7px; border-radius: 4px;
+    }
+    .badge-dev {
+      font-size: 7px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--bg-elevated); color: var(--text-muted); padding: 2px 6px; border-radius: 3px;
+    }
+
+    /* ── VERIFIED ── */
+    .verified-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange-primary), var(--orange-deep));
+    }
+    .verified-badge svg { width: 12px; height: 12px; }
+
+    /* ── SPORT CARDS ── */
+    .sport-card {
+      background: var(--bg-secondary); border: 2px solid var(--border-color);
+      border-radius: 14px; padding: 20px 16px; text-align: center;
+      transition: all 0.2s ease; cursor: pointer; position: relative; overflow: hidden;
+    }
+    .sport-card.active {
+      border-color: var(--orange-primary);
+      background: var(--bg-tertiary);
+      box-shadow: 0 0 24px var(--orange-glow), inset 0 1px 0 rgba(242,122,26,0.1);
+    }
+    .sport-card.active::after {
+      content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--orange-primary), transparent);
+      border-radius: 3px 3px 0 0;
+    }
+    .sport-card.locked {
+      opacity: 0.32; cursor: not-allowed; pointer-events: none;
+    }
+
+    /* ── SCOPE CARDS ── */
+    .scope-card {
+      background: var(--bg-secondary); border: 2px solid var(--border-color);
+      border-radius: 12px; padding: 16px; text-align: center;
+      transition: all 0.2s ease; cursor: pointer; flex: 1;
+    }
+    .scope-card.active {
+      border-color: var(--orange-primary);
+      background: var(--bg-tertiary);
+      box-shadow: 0 0 20px var(--orange-glow);
+    }
+    .scope-card.locked { opacity: 0.32; cursor: not-allowed; pointer-events: none; }
+
+    /* ── DROPDOWN ── */
+    .region-dropdown {
+      appearance: none; -webkit-appearance: none;
+      background: var(--bg-secondary); border: 2px solid var(--border-color);
+      border-radius: 12px; padding: 14px 44px 14px 16px;
+      color: var(--text-primary); font-size: 14px; font-weight: 600;
+      width: 100%; cursor: pointer; transition: border-color 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23F27A1A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 16px center;
+    }
+    .region-dropdown:focus { outline: none; border-color: var(--orange-primary); box-shadow: 0 0 0 3px var(--orange-glow); }
+
+    /* ── SWIPABLE RANK SECTION ── */
+    .rank-tabs-bar { display: flex; gap: 0; background: var(--bg-secondary); border-radius: 12px; padding: 4px; border: 1px solid var(--border-color); }
+    .rank-tab-btn {
+      flex: 1; padding: 12px 8px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      text-align: center; cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+      border: none; background: transparent; font-family: 'Inter', system-ui;
+    }
+    .rank-tab-btn.active { background: var(--orange-primary); color: var(--text-inverse); box-shadow: 0 2px 8px var(--orange-glow); }
+    .rank-tab-btn.locked { opacity: 0.3; cursor: not-allowed; }
+
+    .swipe-container { overflow: hidden; position: relative; touch-action: pan-y; }
+    .swipe-track {
+      display: flex; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .swipe-panel { min-width: 100%; flex-shrink: 0; }
+
+    /* ── LEADERBOARD CARDS ── */
+    .lb-card {
+      background: var(--bg-secondary); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 16px 18px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .lb-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-card); }
+    .lb-card-top3 { padding: 20px 22px; }
+
+    /* ── SEARCH ── */
+    .search-input {
+      background: var(--bg-secondary); border: 2px solid var(--border-color);
+      border-radius: 12px; color: var(--text-primary);
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { outline: none; border-color: var(--orange-primary); box-shadow: 0 0 0 3px var(--orange-glow); }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle {
+      width: 52px; height: 28px; border-radius: 14px; padding: 3px;
+      cursor: pointer; transition: background 0.3s; border: none;
+      background: var(--bg-elevated); position: relative;
+    }
+    .theme-toggle .knob {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--orange-primary); transition: transform 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    [data-theme="light"] .theme-toggle .knob { transform: translateX(24px); }
+
+    /* ── TABLE ── */
+    .rest-table { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; }
+    .rest-table th { color: var(--text-muted); background: var(--bg-tertiary); }
+    .rest-table td { color: var(--text-secondary); border-top: 1px solid var(--border-subtle); }
+    .rest-table tr:hover td { background: var(--bg-hover); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.3s ease forwards; }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: var(--orange-primary); }
+      50% { border-color: var(--orange-bright); }
+    }
+
+    /* ── LOCKED OVERLAY PANEL ── */
+    .locked-panel {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 320px; color: var(--text-muted); gap: 12px;
+    }
+    .locked-panel svg { opacity: 0.4; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- ═══════════ HEADER ═══════════ -->
+    <header class="mb-8 flex items-center justify-between">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- LOGO (SVG recreation of the IP mark) -->
+        <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 10 L10 90 L40 90 L40 50 Q40 30 60 30 L90 30 L90 10 Z" fill="var(--orange-primary)"/>
+            <path d="M50 50 L50 90 L90 90 L90 50 Q90 50 50 50 Z" fill="var(--orange-primary)"/>
+            <path d="M50 50 Q50 90 90 90 L90 50 Z" fill="var(--bg-primary)"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-display text-2xl sm:text-4xl tracking-wider" style="color: var(--text-primary); letter-spacing: 0.06em;">
+            INFINITE PERFORMANCE
+          </h1>
+          <p class="font-display text-sm sm:text-lg tracking-widest" style="color: var(--orange-primary);">LEADERBOARD</p>
+        </div>
+      </div>
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <div class="knob">
+          <svg id="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0F11" stroke-width="2.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg id="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F0F11" stroke-width="2.5" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </div>
+      </button>
+    </header>
+
+    <!-- Subheader Badge -->
+    <div class="mb-8 flex justify-center sm:justify-start">
+      <div class="inline-flex items-center gap-2 rounded-full px-5 py-2" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange-primary)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span class="text-xs font-semibold tracking-widest uppercase" style="color: var(--text-secondary);">The Official Rankings of the IP Club Collective</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ SPORT CARDS (Level 1) ═══════════ -->
+    <section class="mb-6">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="sport-card active" onclick="selectSport('tennis')">
+          <svg class="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--orange-primary)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M18.36 5.64a9 9 0 01-1.77 12.73"/><path d="M5.64 5.64a9 9 0 001.77 12.73"/></svg>
+          <p class="font-heading font-bold text-sm" style="color: var(--text-primary);">Tennis</p>
+        </div>
+        <div class="sport-card locked">
+          <svg class="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <p class="font-heading font-bold text-sm" style="color: var(--text-muted);">Padel</p>
+          <span class="badge-soon mt-1.5 inline-block">Coming Soon</span>
+        </div>
+        <div class="sport-card locked">
+          <svg class="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="20"/><path d="M7 12l5-4 5 4"/></svg>
+          <p class="font-heading font-bold text-sm" style="color: var(--text-muted);">Badminton</p>
+          <span class="badge-soon mt-1.5 inline-block">Coming Soon</span>
+        </div>
+        <div class="sport-card locked">
+          <svg class="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+          <p class="font-heading font-bold text-sm" style="color: var(--text-muted);">Pickleball</p>
+          <span class="badge-soon mt-1.5 inline-block">Coming Soon</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCOPE CARDS (Level 2) ═══════════ -->
+    <section class="mb-6">
+      <div class="flex gap-3">
+        <div class="scope-card active">
+          <p class="font-heading font-bold text-sm" style="color: var(--text-primary);">Regional</p>
+          <p class="text-xs mt-0.5" style="color: var(--text-muted);">City-level rankings</p>
+        </div>
+        <div class="scope-card locked">
+          <p class="font-heading font-bold text-sm" style="color: var(--text-muted);">National</p>
+          <span class="badge-dev mt-1 inline-block">Under Development</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ REGION DROPDOWN ═══════════ -->
+    <section class="mb-6">
+      <label class="block text-xs font-semibold uppercase tracking-widest mb-2" style="color: var(--text-muted);">Region</label>
+      <select id="region-select" class="region-dropdown" onchange="selectRegion(this.value)">
+        <option value="Tangerang">Tangerang</option>
+        <option value="DKI Jakarta">DKI Jakarta</option>
+        <option value="Bogor">Bogor</option>
+        <option value="Depok">Depok</option>
+        <option value="Bekasi">Bekasi</option>
+      </select>
+    </section>
+
+    <!-- ═══════════ RANK TABS + SWIPE SECTION (Level 3) ═══════════ -->
+    <section class="mb-6">
+      <div class="rank-tabs-bar mb-0">
+        <button id="rank-btn-0" class="rank-tab-btn active" onclick="switchRank(0)">Beginner</button>
+        <button id="rank-btn-1" class="rank-tab-btn locked">Intermediate <span class="badge-soon ml-1" style="font-size:7px;">Soon</span></button>
+        <button id="rank-btn-2" class="rank-tab-btn locked">Advanced <span class="badge-soon ml-1" style="font-size:7px;">Soon</span></button>
+      </div>
+    </section>
+
+    <!-- Swipable Panels -->
+    <div class="swipe-container" id="swipe-container">
+      <div class="swipe-track" id="swipe-track">
+        <!-- Panel 0: Beginner (active) -->
+        <div class="swipe-panel" id="panel-beginner">
+          <!-- Search -->
+          <div class="mb-6 relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <input id="search-input" type="text" placeholder="Search player by name..."
+              class="search-input w-full pl-11 pr-4 py-3.5 text-sm font-body" />
+          </div>
+          <!-- Leaderboard renders here -->
+          <div id="leaderboard-container"></div>
+          <div id="empty-state" class="hidden text-center py-16">
+            <p class="text-lg font-medium" style="color: var(--text-muted);">No players found</p>
+            <p class="text-sm mt-1" style="color: var(--text-muted); opacity: 0.6;">Try adjusting your search or region.</p>
+          </div>
+        </div>
+        <!-- Panel 1: Intermediate (locked) -->
+        <div class="swipe-panel">
+          <div class="locked-panel">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <p class="font-heading font-bold text-lg" style="color: var(--text-muted);">Intermediate Rankings</p>
+            <p class="text-sm" style="color: var(--text-muted); opacity: 0.6;">Coming soon — data collection in progress</p>
+          </div>
+        </div>
+        <!-- Panel 2: Advanced (locked) -->
+        <div class="swipe-panel">
+          <div class="locked-panel">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <p class="font-heading font-bold text-lg" style="color: var(--text-muted);">Advanced Rankings</p>
+            <p class="text-sm" style="color: var(--text-muted); opacity: 0.6;">Coming soon — data collection in progress</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer class="mt-14 pt-6 pb-8 text-center" style="border-top: 1px solid var(--border-color);">
+      <p class="text-xs" style="color: var(--text-muted);">All rankings verified by the Infinite Performance Committee &middot; Data updated periodically</p>
+    </footer>
+  </div>
+
+<script>
+// ────────────────────────────────────────
+//  MOCK DATA: 50 players, 10 per region
+// ────────────────────────────────────────
+const PLAYERS = [
+  // TANGERANG
+  { name: "Rizky Firmansyah", region: "Tangerang", matches: 22, wins: 18, losses: 4, points: 1480 },
+  { name: "Aditya Nugroho", region: "Tangerang", matches: 20, wins: 17, losses: 3, points: 1420 },
+  { name: "Fajar Ramadhan", region: "Tangerang", matches: 21, wins: 16, losses: 5, points: 1355 },
+  { name: "Dimas Prasetyo", region: "Tangerang", matches: 19, wins: 15, losses: 4, points: 1310 },
+  { name: "Bagus Setiawan", region: "Tangerang", matches: 18, wins: 14, losses: 4, points: 1260 },
+  { name: "Hendra Wijaya", region: "Tangerang", matches: 20, wins: 14, losses: 6, points: 1205 },
+  { name: "Yusuf Hakim", region: "Tangerang", matches: 17, wins: 13, losses: 4, points: 1150 },
+  { name: "Arief Hidayat", region: "Tangerang", matches: 19, wins: 12, losses: 7, points: 1090 },
+  { name: "Galih Pratama", region: "Tangerang", matches: 16, wins: 11, losses: 5, points: 1020 },
+  { name: "Naufal Aziz", region: "Tangerang", matches: 18, wins: 10, losses: 8, points: 955 },
+  // DKI JAKARTA
+  { name: "Raka Mahendra", region: "DKI Jakarta", matches: 24, wins: 20, losses: 4, points: 1530 },
+  { name: "Satria Wibowo", region: "DKI Jakarta", matches: 22, wins: 18, losses: 4, points: 1460 },
+  { name: "Fikri Alamsyah", region: "DKI Jakarta", matches: 21, wins: 17, losses: 4, points: 1390 },
+  { name: "Daffa Kurniawan", region: "DKI Jakarta", matches: 20, wins: 16, losses: 4, points: 1340 },
+  { name: "Rafi Andhika", region: "DKI Jakarta", matches: 23, wins: 16, losses: 7, points: 1270 },
+  { name: "Gilang Saputra", region: "DKI Jakarta", matches: 19, wins: 14, losses: 5, points: 1210 },
+  { name: "Bintang Putra", region: "DKI Jakarta", matches: 18, wins: 13, losses: 5, points: 1140 },
+  { name: "Kemal Adriansyah", region: "DKI Jakarta", matches: 17, wins: 12, losses: 5, points: 1080 },
+  { name: "Reza Syahputra", region: "DKI Jakarta", matches: 20, wins: 12, losses: 8, points: 1010 },
+  { name: "Iqbal Maulana", region: "DKI Jakarta", matches: 16, wins: 10, losses: 6, points: 940 },
+  // BOGOR
+  { name: "Wahyu Santoso", region: "Bogor", matches: 23, wins: 19, losses: 4, points: 1500 },
+  { name: "Ilham Fadillah", region: "Bogor", matches: 21, wins: 17, losses: 4, points: 1430 },
+  { name: "Bayu Arifin", region: "Bogor", matches: 20, wins: 16, losses: 4, points: 1370 },
+  { name: "Taufik Ismail", region: "Bogor", matches: 19, wins: 15, losses: 4, points: 1300 },
+  { name: "Farhan Dharmawan", region: "Bogor", matches: 21, wins: 15, losses: 6, points: 1240 },
+  { name: "Rangga Kusuma", region: "Bogor", matches: 18, wins: 13, losses: 5, points: 1180 },
+  { name: "Hafiz Rahmadi", region: "Bogor", matches: 17, wins: 12, losses: 5, points: 1115 },
+  { name: "Andi Putra", region: "Bogor", matches: 19, wins: 12, losses: 7, points: 1050 },
+  { name: "Surya Permana", region: "Bogor", matches: 16, wins: 10, losses: 6, points: 985 },
+  { name: "Lutfi Habibi", region: "Bogor", matches: 15, wins: 9, losses: 6, points: 910 },
+  // DEPOK
+  { name: "Alfian Rachman", region: "Depok", matches: 22, wins: 19, losses: 3, points: 1510 },
+  { name: "Zaki Mubarok", region: "Depok", matches: 21, wins: 17, losses: 4, points: 1440 },
+  { name: "Hanif Firdaus", region: "Depok", matches: 20, wins: 16, losses: 4, points: 1380 },
+  { name: "Fauzan Akbar", region: "Depok", matches: 19, wins: 15, losses: 4, points: 1320 },
+  { name: "Irfan Harahap", region: "Depok", matches: 22, wins: 15, losses: 7, points: 1250 },
+  { name: "Asman Hidayatullah", region: "Depok", matches: 18, wins: 14, losses: 4, points: 1195 },
+  { name: "Riski Saputra", region: "Depok", matches: 17, wins: 12, losses: 5, points: 1130 },
+  { name: "Dani Setiadi", region: "Depok", matches: 19, wins: 12, losses: 7, points: 1060 },
+  { name: "Anwar Ibrahim", region: "Depok", matches: 16, wins: 10, losses: 6, points: 995 },
+  { name: "Rendi Pradipta", region: "Depok", matches: 15, wins: 9, losses: 6, points: 920 },
+  // BEKASI
+  { name: "Yoga Pratama", region: "Bekasi", matches: 23, wins: 19, losses: 4, points: 1490 },
+  { name: "Krisna Aditya", region: "Bekasi", matches: 21, wins: 17, losses: 4, points: 1425 },
+  { name: "Maulana Yusuf", region: "Bekasi", matches: 20, wins: 16, losses: 4, points: 1360 },
+  { name: "Andika Nugraha", region: "Bekasi", matches: 19, wins: 15, losses: 4, points: 1295 },
+  { name: "Putra Ramadhan", region: "Bekasi", matches: 21, wins: 15, losses: 6, points: 1235 },
+  { name: "Rama Febriansyah", region: "Bekasi", matches: 18, wins: 13, losses: 5, points: 1170 },
+  { name: "Deni Kurniawan", region: "Bekasi", matches: 17, wins: 12, losses: 5, points: 1100 },
+  { name: "Ahmad Fauzi", region: "Bekasi", matches: 19, wins: 12, losses: 7, points: 1040 },
+  { name: "Febri Herlambang", region: "Bekasi", matches: 16, wins: 10, losses: 6, points: 975 },
+  { name: "Sigit Wicaksono", region: "Bekasi", matches: 15, wins: 9, losses: 6, points: 905 },
+];
+
+let activeRegion = "Tangerang";
+let currentRankPanel = 0;
+
+const VERIFIED_SVG = `<span class="verified-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#0F0F11" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`;
+
+// ────────────────────────────────────────
+//  THEME TOGGLE
+// ────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  document.getElementById('theme-icon-dark').style.display = next === 'dark' ? 'block' : 'none';
+  document.getElementById('theme-icon-light').style.display = next === 'light' ? 'block' : 'none';
+  // Update dropdown arrow color for light mode
+  const dd = document.querySelector('.region-dropdown');
+  if (next === 'light') {
+    dd.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23D46010' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`;
+  } else {
+    dd.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23F27A1A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`;
+  }
+}
+
+// ────────────────────────────────────────
+//  REGION SWITCHING
+// ────────────────────────────────────────
+function selectRegion(region) {
+  activeRegion = region;
+  document.getElementById('search-input').value = '';
+  renderLeaderboard();
+}
+
+function selectSport() { /* only tennis active */ }
+
+// ────────────────────────────────────────
+//  RANK PANEL SWITCHING + SWIPE
+// ────────────────────────────────────────
+function switchRank(index) {
+  if (index !== 0) return; // only beginner unlocked
+  currentRankPanel = index;
+  document.querySelectorAll('.rank-tab-btn').forEach((btn, i) => {
+    if (i === 0) btn.classList.toggle('active', index === i);
+  });
+  updateSwipePosition();
+}
+
+function updateSwipePosition() {
+  const track = document.getElementById('swipe-track');
+  track.style.transform = `translateX(-${currentRankPanel * 100}%)`;
+}
+
+// Touch swipe handling
+(function initSwipe() {
+  let startX = 0, startY = 0, isDragging = false, currentX = 0;
+  const container = document.getElementById('swipe-container');
+  const track = document.getElementById('swipe-track');
+
+  container.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+    track.style.transition = 'none';
+  }, { passive: true });
+
+  container.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (Math.abs(dy) > Math.abs(dx)) { isDragging = false; return; }
+    currentX = dx;
+    const offset = -(currentRankPanel * container.offsetWidth) + dx;
+    track.style.transform = `translateX(${offset}px)`;
+  }, { passive: true });
+
+  container.addEventListener('touchend', () => {
+    if (!isDragging) { track.style.transition = ''; updateSwipePosition(); return; }
+    isDragging = false;
+    track.style.transition = '';
+    const threshold = container.offsetWidth * 0.25;
+    if (currentX < -threshold && currentRankPanel < 2) {
+      // swiping to locked panels — snap back
+      // (only panel 0 is unlocked, so always snap back)
+    } else if (currentX > threshold && currentRankPanel > 0) {
+      currentRankPanel--;
+    }
+    currentX = 0;
+    switchRank(currentRankPanel);
+    updateSwipePosition();
+  });
+})();
+
+// ────────────────────────────────────────
+//  LEADERBOARD RENDER
+// ────────────────────────────────────────
+function renderLeaderboard() {
+  const query = document.getElementById('search-input').value.toLowerCase().trim();
+  let players = PLAYERS
+    .filter(p => p.region === activeRegion)
+    .sort((a, b) => b.points - a.points);
+
+  if (query) players = players.filter(p => p.name.toLowerCase().includes(query));
+
+  const container = document.getElementById('leaderboard-container');
+  const emptyState = document.getElementById('empty-state');
+
+  if (players.length === 0) {
+    container.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  emptyState.classList.add('hidden');
+
+  const top10 = players.slice(0, 10);
+  const rest = players.slice(10);
+  let html = '';
+
+  // ── SECTION LABEL ──
+  html += `<div class="mb-4 flex items-center gap-3">
+    <span class="block w-6 h-0.5 rounded" style="background: var(--orange-primary);"></span>
+    <span class="text-xs font-bold uppercase tracking-widest" style="color: var(--orange-primary);">Top ${Math.min(10, players.length)} Players</span>
+  </div>`;
+
+  // ── TOP 3 (larger cards) ──
+  const top3 = top10.slice(0, 3);
+  const rest7 = top10.slice(3);
+
+  if (top3.length > 0) {
+    html += `<div class="grid gap-3 mb-3">`;
+    top3.forEach((p, i) => {
+      const rank = i + 1;
+      const glowClass = rank === 1 ? 'glow-gold' : rank === 2 ? 'glow-silver' : 'glow-bronze';
+      const rankClass = `rank-${rank}`;
+      const pointColor = rank === 1 ? 'color: var(--gold)' : rank === 2 ? 'color: var(--silver)' : 'color: var(--bronze)';
+
+      html += `
+        <div class="lb-card lb-card-top3 ${glowClass} fade-up" style="animation-delay: ${i * 40}ms">
+          <div class="flex items-center gap-4">
+            <div class="rank-badge rank-lg ${rankClass} shrink-0">${rank}</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="font-heading font-bold text-base truncate" style="color: var(--text-primary);">${p.name}</span>
+                ${VERIFIED_SVG}
+              </div>
+              <span class="text-xs" style="color: var(--text-muted);">${p.region}</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-7 text-right shrink-0">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider font-semibold" style="color: var(--text-muted);">Matches</p>
+                <p class="text-sm font-bold" style="color: var(--text-secondary);">${p.matches}</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider font-semibold" style="color: var(--text-muted);">W/L</p>
+                <p class="text-sm font-bold" style="color: var(--text-secondary);">${p.wins}-${p.losses}</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider font-semibold" style="color: var(--text-muted);">Points</p>
+                <p class="text-base font-extrabold" style="${pointColor}">${p.points.toLocaleString()}</p>
+              </div>
+            </div>
+            <div class="flex sm:hidden items-center gap-4 text-right shrink-0">
+              <div>
+                <p class="text-[9px] uppercase" style="color: var(--text-muted);">W/L</p>
+                <p class="text-xs font-bold" style="color: var(--text-secondary);">${p.wins}-${p.losses}</p>
+              </div>
+              <div>
+                <p class="text-[9px] uppercase" style="color: var(--text-muted);">Pts</p>
+                <p class="text-sm font-extrabold" style="${pointColor}">${p.points.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ── RANKS 4-10 (standard cards) ──
+  if (rest7.length > 0) {
+    html += `<div class="grid gap-2 mb-8">`;
+    rest7.forEach((p, i) => {
+      const rank = i + 4;
+      html += `
+        <div class="lb-card glow-orange fade-up" style="animation-delay: ${(i + 3) * 30}ms">
+          <div class="flex items-center gap-3">
+            <div class="rank-badge rank-md rank-default shrink-0">${rank}</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-heading font-semibold text-sm truncate" style="color: var(--text-primary);">${p.name}</span>
+                ${VERIFIED_SVG}
+              </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-6 text-right shrink-0">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider" style="color: var(--text-muted);">Matches</p>
+                <p class="text-sm font-semibold" style="color: var(--text-secondary);">${p.matches}</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider" style="color: var(--text-muted);">W/L</p>
+                <p class="text-sm font-semibold" style="color: var(--text-secondary);">${p.wins}-${p.losses}</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider" style="color: var(--text-muted);">Points</p>
+                <p class="text-sm font-bold" style="color: var(--orange-primary);">${p.points.toLocaleString()}</p>
+              </div>
+            </div>
+            <div class="flex sm:hidden items-center gap-3 text-right shrink-0">
+              <div>
+                <p class="text-[9px]" style="color: var(--text-muted);">W/L</p>
+                <p class="text-xs font-semibold" style="color: var(--text-secondary);">${p.wins}-${p.losses}</p>
+              </div>
+              <div>
+                <p class="text-[9px]" style="color: var(--text-muted);">Pts</p>
+                <p class="text-xs font-bold" style="color: var(--orange-primary);">${p.points.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ── REST OF FIELD (11+) ──
+  if (rest.length > 0) {
+    html += `<div class="mb-3 flex items-center gap-3">
+      <span class="block w-6 h-0.5 rounded" style="background: var(--border-color);"></span>
+      <span class="text-xs font-bold uppercase tracking-widest" style="color: var(--text-muted);">Rest of the Field</span>
+    </div>`;
+    html += `<div class="rest-table"><table class="w-full text-sm">
+      <thead><tr>
+        <th class="text-left px-4 py-3 text-[10px] uppercase tracking-wider font-semibold w-14">#</th>
+        <th class="text-left px-4 py-3 text-[10px] uppercase tracking-wider font-semibold">Player</th>
+        <th class="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold hidden sm:table-cell">Matches</th>
+        <th class="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold">W/L</th>
+        <th class="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold">Points</th>
+        <th class="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold w-16">Verified</th>
+      </tr></thead><tbody>`;
+    rest.forEach((p, i) => {
+      const rank = i + 11;
+      html += `
+        <tr class="fade-up" style="animation-delay: ${(i + 10) * 20}ms">
+          <td class="px-4 py-3"><span class="rank-badge rank-sm rank-default">${rank}</span></td>
+          <td class="px-4 py-3 font-medium" style="color: var(--text-primary);">${p.name}</td>
+          <td class="text-center px-4 py-3 hidden sm:table-cell">${p.matches}</td>
+          <td class="text-center px-4 py-3">${p.wins}-${p.losses}</td>
+          <td class="text-center px-4 py-3 font-semibold" style="color: var(--text-primary);">${p.points.toLocaleString()}</td>
+          <td class="text-center px-4 py-3">${VERIFIED_SVG}</td>
+        </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// ────────────────────────────────────────
+//  INIT
+// ────────────────────────────────────────
+document.getElementById('search-input').addEventListener('input', renderLeaderboard);
+renderLeaderboard();
+</script>
+</body>
+</html>
