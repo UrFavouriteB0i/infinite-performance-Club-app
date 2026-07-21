@@ -1,14 +1,18 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../lib/supabase'; // Adjust path if necessary
 
-// ────────────────────────────────────────
-//  MOCK DATA: 50 players, 10 per region
-// ────────────────────────────────────────
-const PLAYERS = [
-  // TANGERANG
-  { name: "Rizky Firmansyah", region: "Tangerang", matches: 22, wins: 18, losses: 4, points: 1480 },
-];
+// Define your TypeScript interface for the player data
+interface Player {
+  id: string;
+  name: string;
+  region: string;
+  matches: number;
+  wins: number;
+  losses: number;
+  points: number;
+}
 
 const VerifiedBadge = () => (
   <span className="verified-badge">
@@ -20,6 +24,10 @@ const VerifiedBadge = () => (
 
 
 export default function LeaderboardPage() {
+  // database player flag
+  const [playersData, setPlayersData] = useState<Player[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [theme, setTheme] = useState('dark');
   const [activeRegion, setActiveRegion] = useState('Tangerang');
   const [activeSport, setActiveSport] = useState('Tennis'); // Add this line
@@ -48,8 +56,34 @@ export default function LeaderboardPage() {
   const [currentX, setCurrentX] = useState(0);
 
   useEffect(() => {
+    async function fetchPlayers() {
+      try {
+        const { data, error } = await supabase
+          .from('players')
+          .select('*')
+          .order('points', { ascending: false }); // Sort by points immediately
+
+        if (error) throw error;
+        
+        if (data) {
+          setPlayersData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching players:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPlayers();
+  }, []);
+
+  // Theme effect
+  useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  
 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
@@ -100,9 +134,9 @@ export default function LeaderboardPage() {
 
   // LEADERBOARD RENDER LOGIC
   const query = searchQuery.toLowerCase().trim();
-  let players = PLAYERS
-    .filter(p => p.region === activeRegion)
-    .sort((a, b) => b.points - a.points);
+  
+  let players = playersData
+    .filter(p => p.region === activeRegion);
 
   if (query) {
     players = players.filter(p => p.name.toLowerCase().includes(query));
