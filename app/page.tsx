@@ -18,12 +18,28 @@ const VerifiedBadge = () => (
   </span>
 );
 
+
 export default function LeaderboardPage() {
   const [theme, setTheme] = useState('dark');
   const [activeRegion, setActiveRegion] = useState('Tangerang');
+  const [activeSport, setActiveSport] = useState('Tennis'); // Add this line
   const [searchQuery, setSearchQuery] = useState('');
   const [currentRankPanel, setCurrentRankPanel] = useState(0);
 
+  // Search expand states
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const toggleSearch = () => {
+    setIsSearchExpanded(!isSearchExpanded);
+    if (!isSearchExpanded) {
+      // Small delay to allow CSS transition to start before focusing
+      setTimeout(() => searchInputRef.current?.focus(), 50); 
+    } else {
+      setSearchQuery(''); // Optional: clear search if closed
+    }
+  };
+  
   // Swipe logic states
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -105,12 +121,8 @@ export default function LeaderboardPage() {
         <header className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             {/* LOGO */}
-            <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 10 L10 90 L40 90 L40 50 Q40 30 60 30 L90 30 L90 10 Z" fill="var(--orange-primary)"/>
-                <path d="M50 50 L50 90 L90 90 L90 50 Q90 50 50 50 Z" fill="var(--orange-primary)"/>
-                <path d="M50 50 Q50 90 90 90 L90 50 Z" fill="var(--bg-primary)"/>
-              </svg>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+              <img src="./iP logo.jpg" alt="Infinite Performance Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="font-display text-2xl sm:text-4xl tracking-wider" style={{ color: 'var(--text-primary)', letterSpacing: '0.06em' }}>
@@ -149,72 +161,96 @@ export default function LeaderboardPage() {
         </div>
 
         {/* ═══════════ SPORT CARDS (Level 1) ═══════════ */}
-        <section className="mb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="sport-card active">
-              <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--orange-primary)" strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="12" r="10"/><path d="M18.36 5.64a9 9 0 01-1.77 12.73"/><path d="M5.64 5.64a9 9 0 001.77 12.73"/>
-              </svg>
-              <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Tennis</p>
+        {/* ═══════════ SPORT SELECTION (Level 1) ═══════════ */}
+        {/* MOBILE REORDERING WRAPPER */}
+        <div className="flex flex-col sm:block">
+          
+          {/* 1. SPORT: First in code (Desktop #1), order-1 on Mobile (#1) */}
+          <section className="mb-6 order-1">
+            {/* MOBILE VIEW: Dropdown */}
+            <div className="block sm:hidden">
+              <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+                Sport
+              </label>
+              <select 
+                value={activeSport} 
+                className="region-dropdown" 
+                onChange={(e) => setActiveSport(e.target.value)}
+              >
+                <option value="Tennis">Tennis</option>
+                <option value="Padel" disabled>Padel (Coming Soon)</option>
+                <option value="Badminton" disabled>Badminton (Coming Soon)</option>
+                <option value="Pickleball" disabled>Pickleball (Coming Soon)</option>
+              </select>
             </div>
-            <div className="sport-card locked">
-              <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
-                <rect x="2" y="4" width="20" height="16" rx="3"/><line x1="12" y1="4" x2="12" y2="20"/>
-              </svg>
-              <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Padel</p>
-              <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
-            </div>
-            <div className="sport-card locked">
-              <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="20"/><path d="M7 12l5-4 5 4"/>
-              </svg>
-              <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Badminton</p>
-              <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
-            </div>
-            <div className="sport-card locked">
-              <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-              <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Pickleball</p>
-              <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
-            </div>
-          </div>
-        </section>
 
-        {/* ═══════════ SCOPE CARDS (Level 2) ═══════════ */}
-        <section className="mb-6">
-          <div className="flex gap-3">
-            <div className="scope-card active">
-              <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Regional</p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>City-level rankings</p>
+            {/* DESKTOP VIEW: Cards */}
+            <div className="hidden sm:grid sm:grid-cols-4 gap-3">
+              <div className={`sport-card ${activeSport === 'Tennis' ? 'active' : ''}`} onClick={() => setActiveSport('Tennis')}>
+                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--orange-primary)" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M18.36 5.64a9 9 0 01-1.77 12.73"/><path d="M5.64 5.64a9 9 0 001.77 12.73"/>
+                </svg>
+                <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Tennis</p>
+              </div>
+              <div className="sport-card locked">
+                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
+                  <rect x="2" y="4" width="20" height="16" rx="3"/><line x1="12" y1="4" x2="12" y2="20"/>
+                </svg>
+                <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Padel</p>
+                <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
+              </div>
+              <div className="sport-card locked">
+                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="20"/><path d="M7 12l5-4 5 4"/>
+                </svg>
+                <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Badminton</p>
+                <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
+              </div>
+              <div className="sport-card locked">
+                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Pickleball</p>
+                <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
+              </div>
             </div>
-            <div className="scope-card locked">
-              <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>National</p>
-              <span className="badge-dev mt-1 inline-block">Under Development</span>
+          </section>
+
+          {/* 2. SCOPE CARDS: Second in code (Desktop #2), order-3 on Mobile (#3) */}
+          <section className="mb-6 order-3">
+            <div className="flex gap-3">
+              <div className="scope-card active">
+                <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Regional</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>City-level rankings</p>
+              </div>
+              <div className="scope-card locked">
+                <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>National</p>
+                <span className="badge-dev mt-1 inline-block">Under Development</span>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>        
 
-        {/* ═══════════ REGION DROPDOWN ═══════════ */}
-        <section className="mb-6">
-          <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Region</label>
-          <select value={activeRegion} className="region-dropdown" onChange={selectRegion}>
-            <option value="Tangerang">Tangerang</option>
-            <option value="DKI Jakarta">DKI Jakarta</option>
-            <option value="Bogor">Bogor</option>
-            <option value="Depok">Depok</option>
-            <option value="Bekasi">Bekasi</option>
-          </select>
-        </section>
+          {/* 3. REGION DROPDOWN: Third in code (Desktop #3), order-2 on Mobile (#2) */}
+          <section className="mb-6 order-2">
+            <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Region</label>
+            <select value={activeRegion} className="region-dropdown" onChange={selectRegion}>
+              <option value="Tangerang">Tangerang</option>
+              <option value="DKI Jakarta">DKI Jakarta</option>
+              <option value="Bogor">Bogor</option>
+              <option value="Depok">Depok</option>
+              <option value="Bekasi">Bekasi</option>
+            </select>
+          </section>
 
-        {/* ═══════════ RANK TABS + SWIPE SECTION (Level 3) ═══════════ */}
-        <section className="mb-6">
-          <div className="rank-tabs-bar mb-0">
-            <button className={`rank-tab-btn ${currentRankPanel === 0 ? 'active' : ''}`} onClick={() => switchRank(0)}>Beginner</button>
-            <button className="rank-tab-btn locked">Intermediate <span className="badge-soon ml-1" style={{ fontSize: '7px' }}>Soon</span></button>
-            <button className="rank-tab-btn locked">Advanced <span className="badge-soon ml-1" style={{ fontSize: '7px' }}>Soon</span></button>
-          </div>
-        </section>
+          {/* 4. RANK TABS: Fourth in code (Desktop #4), order-4 on Mobile (#4) */}
+          <section className="mb-6 order-4">
+            <div className="rank-tabs-bar mb-0">
+              <button className={`rank-tab-btn ${currentRankPanel === 0 ? 'active' : ''}`} onClick={() => switchRank(0)}>Beginner</button>
+              <button className="rank-tab-btn locked">Intermediate <span className="badge-soon ml-1" style={{ fontSize: '7px' }}>Soon</span></button>
+              <button className="rank-tab-btn locked">Advanced <span className="badge-soon ml-1" style={{ fontSize: '7px' }}>Soon</span></button>
+            </div>
+          </section>
+        </div>
 
         {/* Swipable Panels */}
         <div 
@@ -235,21 +271,55 @@ export default function LeaderboardPage() {
           >
             {/* Panel 0: Beginner (active) */}
             <div className="swipe-panel" id="panel-beginner">
-              {/* Search */}
-              <div className="mb-6 relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                  </svg>
+              {/* Minimalist Expanding Search */}
+              <div className="mb-6 flex justify-start sm:justify-end h-10">
+                <div 
+                  className={`group flex items-center transition-all duration-300 ease-in-out border-b-2 
+                    ${isSearchExpanded ? 'w-full border-[var(--orange-primary)]' : 'w-8 border-transparent'}
+                    sm:w-72 sm:border-[var(--border-color)] sm:opacity-50 sm:hover:opacity-100 sm:focus-within:opacity-100 sm:focus-within:border-[var(--orange-primary)]
+                  `}
+                >
+                  {/* Magnifying Glass Button */}
+                  <button 
+                    onClick={toggleSearch}
+                    className={`p-1 shrink-0 transition-colors ${
+                      isSearchExpanded ? 'text-[var(--orange-primary)]' : 'text-[var(--text-muted)]'
+                    } sm:text-[var(--text-muted)] sm:group-focus-within:text-[var(--orange-primary)]`}
+                    aria-label="Toggle search"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                  </button>
+
+                  {/* Input Field */}
+                  <input 
+                    ref={searchInputRef}
+                    id="search-input" 
+                    type="text" 
+                    placeholder="Search name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`bg-transparent outline-none text-sm font-body transition-all duration-300 
+                      ${isSearchExpanded ? 'w-full opacity-100 ml-2 px-1' : 'w-0 opacity-0 p-0'}
+                      sm:w-full sm:opacity-100 sm:ml-2 sm:px-1
+                    `}
+                    style={{ color: 'var(--text-primary)' }}
+                  />
+
+                  {/* Quick Clear 'X' Button (Appears when typing) */}
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery('')} 
+                      className={`p-1 shrink-0 transition-colors ${isSearchExpanded ? 'block' : 'hidden sm:block'}`}
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
+                  )}
                 </div>
-                <input 
-                  id="search-input" 
-                  type="text" 
-                  placeholder="Search player by name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-input w-full pl-11 pr-4 py-3.5 text-sm font-body" 
-                />
               </div>
 
               {/* Leaderboard renders here */}
