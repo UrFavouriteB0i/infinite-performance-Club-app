@@ -187,29 +187,49 @@ export default function LeaderboardPage() {
             {/* DESKTOP VIEW: Cards */}
             <div className="hidden sm:grid sm:grid-cols-4 gap-3">
               <div className={`sport-card ${activeSport === 'Tennis' ? 'active' : ''}`} onClick={() => setActiveSport('Tennis')}>
-                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--orange-primary)" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10"/><path d="M18.36 5.64a9 9 0 01-1.77 12.73"/><path d="M5.64 5.64a9 9 0 001.77 12.73"/>
-                </svg>
+                <div 
+                  className="mx-auto mb-2 w-7 h-7"
+                  style={{
+                    backgroundColor: activeSport === 'Tennis' ? 'var(--orange-primary)' : 'var(--text-muted)',
+                    WebkitMask: 'url(/tennis.svg) center/contain no-repeat',
+                    mask: 'url(/tennis.svg) center/contain no-repeat'
+                  }}
+                />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Tennis</p>
               </div>
               <div className="sport-card locked">
-                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
-                  <rect x="2" y="4" width="20" height="16" rx="3"/><line x1="12" y1="4" x2="12" y2="20"/>
-                </svg>
+                <div 
+                  className="mx-auto mb-2 w-7 h-7"
+                  style={{
+                    backgroundColor: activeSport === 'Padel' ? 'var(--orange-primary)' : 'var(--text-muted)',
+                    WebkitMask: 'url(/padel.svg) center/contain no-repeat',
+                    mask: 'url(/padel.svg) center/contain no-repeat'
+                  }}
+                />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Padel</p>
                 <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
               </div>
               <div className="sport-card locked">
-                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="20"/><path d="M7 12l5-4 5 4"/>
-                </svg>
+                <div 
+                  className="mx-auto mb-2 w-7 h-7"
+                  style={{
+                    backgroundColor: activeSport === 'Badminton' ? 'var(--orange-primary)' : 'var(--text-muted)',
+                    WebkitMask: 'url(/badminton.svg) center/contain no-repeat',
+                    mask: 'url(/badminton.svg) center/contain no-repeat'
+                  }}
+                />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Badminton</p>
                 <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
               </div>
               <div className="sport-card locked">
-                <svg className="mx-auto mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>
-                </svg>
+                <div 
+                  className="mx-auto mb-2 w-7 h-7"
+                  style={{
+                    backgroundColor: activeSport === 'Pickleball' ? 'var(--orange-primary)' : 'var(--text-muted)',
+                    WebkitMask: 'url(/pickleball.svg) center/contain no-repeat',
+                    mask: 'url(/pickleball.svg) center/contain no-repeat'
+                  }}
+                />
                 <p className="font-heading font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Pickleball</p>
                 <span className="badge-soon mt-1.5 inline-block">Coming Soon</span>
               </div>
