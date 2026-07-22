@@ -99,7 +99,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
   return (
     <div className="min-h-screen overflow-x-hidden w-full relative">
       <div className="max-w-[1120px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
-        
+
         {/* HEADER */}
         <header className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -189,7 +189,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
                 <span className="badge-dev mt-1 inline-block">Under Development</span>
               </div>
             </div>
-          </section>        
+          </section>
 
           {/* REGION */}
           <section className="mb-6 order-2">
@@ -210,7 +210,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
           {/* RANK TABS */}
           <section className="mb-4 order-4 w-full">
             <div className="flex gap-4 sm:gap-6 border-b border-[var(--border-color)] overflow-x-auto whitespace-nowrap hide-scrollbar w-full">
-              <button 
+              <button
                 className={`relative pb-3 text-sm font-heading tracking-wide transition-colors ${currentRankPanel === 0 ? "text-[var(--text-primary)] font-bold" : "text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium"}`}
                 onClick={() => switchRank(0)}
               >
@@ -238,12 +238,12 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
           >
             <button onClick={toggleSearch} className={`p-1 shrink-0 transition-colors ${isSearchExpanded ? "text-[var(--orange-primary)]" : "text-[var(--text-muted)]"} sm:text-[var(--text-muted)] sm:group-focus-within:text-[var(--orange-primary)]`} aria-label="Toggle search">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </button>
-            <input 
+            <input
               ref={searchInputRef}
-              type="text" 
+              type="text"
               placeholder="Search name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -256,7 +256,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
             {searchQuery && (
               <button onClick={() => setSearchQuery("")} className={`p-1 shrink-0 transition-colors ${isSearchExpanded ? "block" : "hidden sm:block"}`} style={{ color: "var(--text-muted)" }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             )}
@@ -264,22 +264,23 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
         </div>
 
         {/* SWIPE CONTAINER */}
-        <div 
-          className="swipe-container w-full overflow-hidden" 
+        <div
+          className="swipe-container w-full overflow-hidden"
           ref={containerRef}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <div 
-            className="swipe-track flex w-full" 
+          <div
+            className="swipe-track flex"
             style={{
-              transform: `translateX(calc(-${currentRankPanel * 100}% + ${currentX}px))`,
+              width: "300%",
+              transform: `translateX(calc(-${currentRankPanel * (100 / 3)}% + ${currentX}px))`,
               transition: isDragging ? "none" : "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
             }}
           >
             {/* Panel 0: Beginner */}
-            <div className="swipe-panel px-1.5 py-1">
+            <div className="swipe-panel w-1/3 shrink-0 overflow-hidden px-1.5 py-1">
               <div id="leaderboard-container" className="w-full">
                 {filteredPlayers.length === 0 ? (
                   <div id="empty-state" className="text-center py-16">
@@ -333,40 +334,40 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
                             <tbody>
                               {rest.map((p, i) => {
                                 const rank = i + 11;
-                                
+
                                 // Calculate delta for the table rows
                                 const history = p.history || [];
                                 let delta = 0;
                                 if (history.length >= 2) {
-                                    delta = history[history.length - 1] - history[history.length - 2];
+                                  delta = history[history.length - 1] - history[history.length - 2];
                                 }
                                 const isPositive = delta > 0;
                                 const isNegative = delta < 0;
-                                const formattedDelta = isPositive 
-                                    ? `▲ +${delta.toFixed(2)}` 
-                                    : isNegative 
-                                    ? `▼ ${delta.toFixed(2)}` 
+                                const formattedDelta = isPositive
+                                  ? `▲ +${delta.toFixed(2)}`
+                                  : isNegative
+                                    ? `▼ ${delta.toFixed(2)}`
                                     : `- 0.00`;
                                 const deltaColor = isPositive ? "text-emerald-500" : isNegative ? "text-rose-500" : "text-gray-500";
 
                                 return (
-                                    <tr key={p.name} className="fade-up" style={{ animationDelay: `${(i + 10) * 20}ms` }}>
+                                  <tr key={p.name} className="fade-up" style={{ animationDelay: `${(i + 10) * 20}ms` }}>
                                     <td className="px-4 py-3">
-                                        <span className="rank-badge rank-sm rank-default">{rank}</span>
+                                      <span className="rank-badge rank-sm rank-default">{rank}</span>
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 font-medium truncate max-w-[120px] sm:max-w-none" style={{ color: "var(--text-primary)" }}>{p.name}</td>
                                     <td className="w-16 text-center px-2 py-3"><span className={`text-[10px] font-bold ${deltaColor}`}> {formattedDelta}</span></td>
                                     <td className="text-center px-4 py-3 hidden sm:table-cell">{p.matches_played}</td>
                                     <td className="text-center px-4 py-3">{p.wins}-{p.losses}</td>
                                     <td className="text-center px-4 py-3">
-                                        <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{p.public_rating?.toFixed(2)}</span>
+                                      <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{p.public_rating?.toFixed(2)}</span>
                                     </td>
                                     <td className="text-center px-4 py-3">
-                                        <VerifiedBadge />
+                                      <VerifiedBadge />
                                     </td>
-                                </tr>
+                                  </tr>
                                 );
-                                })}
+                              })}
                             </tbody>
                           </table>
                         </div>
@@ -378,10 +379,10 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
             </div>
 
             {/* Panel 1: Intermediate */}
-            <div className="swipe-panel">
+            <div className="swipe-panel w-1/3 shrink-0 overflow-hidden">
               <div className="locked-panel">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
                 </svg>
                 <p className="font-heading font-bold text-lg" style={{ color: "var(--text-muted)" }}>Intermediate Rankings</p>
                 <p className="text-sm" style={{ color: "var(--text-muted)", opacity: 0.6 }}>Coming soon — data collection in progress</p>
@@ -389,10 +390,10 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
             </div>
 
             {/* Panel 2: Advanced */}
-            <div className="swipe-panel">
+            <div className="swipe-panel w-1/3 shrink-0 overflow-hidden">
               <div className="locked-panel">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
                 </svg>
                 <p className="font-heading font-bold text-lg" style={{ color: "var(--text-muted)" }}>Advanced Rankings</p>
                 <p className="text-sm" style={{ color: "var(--text-muted)", opacity: 0.6 }}>Coming soon — data collection in progress</p>
