@@ -106,7 +106,7 @@ export default function PlayerCard({ player, rank, isTop3, animationIndex }: Pla
             <div className="flex items-center gap-1.5">
               {/* Delta */}
               <div className="flex-1 text-center">
-                <span className={`text-[10px] font-bold ${deltaColor}`}>{formattedDelta}</span>
+                <span className={`text-[8px] font-bold whitespace-nowrap ${deltaColor}`}>{formattedDelta}</span>
               </div>
               {/* Matches */}
               <div className="flex-1 text-center">
@@ -172,7 +172,7 @@ export default function PlayerCard({ player, rank, isTop3, animationIndex }: Pla
           <div className="flex items-center gap-1.5">
             {/* Delta */}
             <div className="flex-1 text-center">
-              <span className={`text-[9px] font-bold ${deltaColor}`}>{formattedDelta}</span>
+              <span className={`text-[8px] font-bold whitespace-nowrap ${deltaColor}`}>{formattedDelta}</span>
             </div>
             {/* Matches */}
             <div className="flex-1 text-center">

@@ -15,6 +15,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
   const [activeSport, setActiveSport] = useState("Tennis");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentRankPanel, setCurrentRankPanel] = useState(0);
+  const [visibleRestCount, setVisibleRestCount] = useState(40);
 
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +38,10 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    setVisibleRestCount(40);
+  }, [activeRegion, searchQuery]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -92,7 +97,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
   }
 
   const top10 = filteredPlayers.slice(0, 10);
-  const rest = filteredPlayers.slice(10);
+  const rest = filteredPlayers.slice(10, 10 + visibleRestCount);
   const top3 = top10.slice(0, 3);
   const rest7 = top10.slice(3);
 
@@ -272,15 +277,14 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
           onTouchEnd={handleTouchEnd}
         >
           <div
-            className="swipe-track flex"
+            className="swipe-track"
             style={{
-              width: "300%",
-              transform: `translateX(calc(-${currentRankPanel * (100 / 3)}% + ${currentX}px))`,
+              transform: `translateX(calc(-${currentRankPanel * 100}% + ${currentX}px))`,
               transition: isDragging ? "none" : "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
             }}
           >
             {/* Panel 0: Beginner */}
-            <div className="swipe-panel w-1/3 shrink-0 overflow-hidden px-1.5 py-1">
+            <div className="swipe-panel overflow-hidden px-1.5 py-1">
               <div id="leaderboard-container" className="w-full">
                 {filteredPlayers.length === 0 ? (
                   <div id="empty-state" className="text-center py-16">
@@ -356,7 +360,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
                                       <span className="rank-badge rank-sm rank-default">{rank}</span>
                                     </td>
                                     <td className="px-2 sm:px-4 py-3 font-medium truncate max-w-[120px] sm:max-w-none" style={{ color: "var(--text-primary)" }}>{p.name}</td>
-                                    <td className="w-16 text-center px-2 py-3"><span className={`text-[10px] font-bold ${deltaColor}`}> {formattedDelta}</span></td>
+                                    <td className="w-16 text-center px-2 py-3"><span className={`text-[10px] font-bold whitespace-nowrap ${deltaColor}`}>{formattedDelta}</span></td>
                                     <td className="text-center px-4 py-3 hidden sm:table-cell">{p.matches_played}</td>
                                     <td className="text-center px-4 py-3">{p.wins}-{p.losses}</td>
                                     <td className="text-center px-4 py-3">
@@ -373,13 +377,38 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
                         </div>
                       </>
                     )}
+
+                    {/* LOAD MORE */}
+                    {filteredPlayers.length > 10 + visibleRestCount && (
+                      <div className="mt-6 mb-2 flex justify-center">
+                        <button
+                          onClick={() => setVisibleRestCount((prev) => prev + 25)}
+                          className="font-heading font-semibold text-sm px-6 py-2.5 rounded-xl border transition-all duration-200"
+                          style={{
+                            background: "var(--bg-secondary)",
+                            border: "1.5px solid var(--border-color)",
+                            color: "var(--orange-primary)",
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--orange-primary)";
+                            (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-tertiary)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-color)";
+                            (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-secondary)";
+                          }}
+                        >
+                          Load {Math.min(25, filteredPlayers.length - 10 - visibleRestCount)} more players
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
             </div>
 
             {/* Panel 1: Intermediate */}
-            <div className="swipe-panel w-1/3 shrink-0 overflow-hidden">
+            <div className="swipe-panel overflow-hidden">
               <div className="locked-panel">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
@@ -390,7 +419,7 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
             </div>
 
             {/* Panel 2: Advanced */}
-            <div className="swipe-panel w-1/3 shrink-0 overflow-hidden">
+            <div className="swipe-panel overflow-hidden">
               <div className="locked-panel">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />

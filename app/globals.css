@@ -58,8 +58,10 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+html { overflow-x: hidden; }
 body {
   font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
   background: var(--bg-primary);
   color: var(--text-primary);
   transition: background 0.3s ease, color 0.3s ease;
