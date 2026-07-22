@@ -96,10 +96,9 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
     filteredPlayers = filteredPlayers.filter((p) => p.name.toLowerCase().includes(query));
   }
 
-  const top10 = filteredPlayers.slice(0, 10);
+  const top3 = filteredPlayers.slice(0, 3);
+  const rest7 = filteredPlayers.slice(3, 10);
   const rest = filteredPlayers.slice(10, 10 + visibleRestCount);
-  const top3 = top10.slice(0, 3);
-  const rest7 = top10.slice(3);
 
   return (
     <div className="min-h-screen overflow-x-hidden w-full relative">
@@ -316,66 +315,13 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
                       </div>
                     )}
 
-                    {/* REST OF FIELD TABLE (11+) */}
+                    {/* RANK 11+ */}
                     {rest.length > 0 && (
-                      <>
-                        <div className="mb-3 flex items-center gap-3">
-                          <span className="block w-6 h-0.5 rounded" style={{ background: "var(--border-color)" }}></span>
-                          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>Rest of the Field</span>
-                        </div>
-                        <div className="rest-table">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr>
-                                <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider font-semibold w-14">#</th>
-                                <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider font-semibold">Player</th>
-                                <th className="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold hidden sm:table-cell">Matches</th>
-                                <th className="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold">W/L</th>
-                                <th className="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold">Points</th>
-                                <th className="text-center px-4 py-3 text-[10px] uppercase tracking-wider font-semibold w-16">Verified</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {rest.map((p, i) => {
-                                const rank = i + 11;
-
-                                // Calculate delta for the table rows
-                                const history = p.history || [];
-                                let delta = 0;
-                                if (history.length >= 2) {
-                                  delta = history[history.length - 1] - history[history.length - 2];
-                                }
-                                const isPositive = delta > 0;
-                                const isNegative = delta < 0;
-                                const formattedDelta = isPositive
-                                  ? `▲ +${delta.toFixed(2)}`
-                                  : isNegative
-                                    ? `▼ ${delta.toFixed(2)}`
-                                    : `- 0.00`;
-                                const deltaColor = isPositive ? "text-emerald-500" : isNegative ? "text-rose-500" : "text-gray-500";
-
-                                return (
-                                  <tr key={p.name} className="fade-up" style={{ animationDelay: `${(i + 10) * 20}ms` }}>
-                                    <td className="px-4 py-3">
-                                      <span className="rank-badge rank-sm rank-default">{rank}</span>
-                                    </td>
-                                    <td className="px-2 sm:px-4 py-3 font-medium truncate max-w-[120px] sm:max-w-none" style={{ color: "var(--text-primary)" }}>{p.name}</td>
-                                    <td className="w-16 text-center px-2 py-3"><span className={`text-[10px] font-bold whitespace-nowrap ${deltaColor}`}>{formattedDelta}</span></td>
-                                    <td className="text-center px-4 py-3 hidden sm:table-cell">{p.matches_played}</td>
-                                    <td className="text-center px-4 py-3">{p.wins}-{p.losses}</td>
-                                    <td className="text-center px-4 py-3">
-                                      <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{p.public_rating?.toFixed(2)}</span>
-                                    </td>
-                                    <td className="text-center px-4 py-3">
-                                      <VerifiedBadge />
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </>
+                      <div className="grid gap-2">
+                        {rest.map((p, i) => (
+                          <PlayerCard key={p.name} player={p} rank={i + 11} isTop3={false} animationIndex={i + 10} />
+                        ))}
+                      </div>
                     )}
 
                     {/* LOAD MORE */}
