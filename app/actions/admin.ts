@@ -2,6 +2,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
+import { processSyncLogic } from '@/lib/sync';
 
 export async function createPlayer(formData: FormData) {
   const pin = formData.get('pin');
@@ -28,35 +29,20 @@ export async function createPlayer(formData: FormData) {
   revalidatePath('/');
 }
 
-export async function syncReclubSession(reclubUrl: string) {
+export async function syncReclubSession(reclubUrl: string, region: string) {
   if (!reclubUrl || !reclubUrl.startsWith("http")) {
     return { success: false, error: "Please provide a valid HTTP URL." };
   }
 
-  // Determine base host (works both locally and on Vercel deployment)
-  const host = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
-
   try {
-    const res = await fetch(`${host}/api/sync`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: reclubUrl }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      return { success: false, error: data.error || "Failed to process session." };
-    }
+    const data = await processSyncLogic(reclubUrl, region);
 
     // Force Next.js to immediately purge the cached leaderboard and re-render
     revalidatePath("/");
     revalidatePath("/admin");
 
-    return { success: true, data: data };
+    return { success: true, data };
   } catch (err: any) {
-    return { success: false, error: err.message || "Network error occurred." };
+    return { success: false, error: err.message || "Failed to process session." };
   }
 }

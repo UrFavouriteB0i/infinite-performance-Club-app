@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { createPlayer, syncReclubSession } from "@/app/actions/admin";
+import { REGIONS } from "@/lib/constants";
 
 export default function AdminPage() {
   const [url, setUrl] = useState("");
+  const [region, setRegion] = useState("TGR");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +17,7 @@ export default function AdminPage() {
     setError(null);
     setResult(null);
 
-    const res = await syncReclubSession(url);
+    const res = await syncReclubSession(url, region);
     setLoading(false);
 
     if (!res.success) {
@@ -36,7 +38,7 @@ export default function AdminPage() {
 
       {/* 2 Grid column layout */}
       <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        
+
         {/* Left column: Reclub Session Sync */}
         <div className="md:col-span-7 space-y-6">
           <div className="bg-[#17171B] border border-[#2A2A34] rounded-2xl p-6 shadow-2xl">
@@ -46,6 +48,23 @@ export default function AdminPage() {
             </div>
 
             <form onSubmit={handleSync} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#A0A0AA] mb-1">
+                  Leaderboard Region
+                </label>
+
+                <select
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                  className="..."
+                >
+                  {REGIONS.map((r) => (
+                    <option key={r.code} value={r.code}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-[#A0A0AA] mb-1">
                   Reclub Scoresheet URL
@@ -125,10 +144,10 @@ export default function AdminPage() {
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#A0A0AA] mb-1">
                 Admin Secret PIN
               </label>
-              <input 
-                type="password" 
-                name="pin" 
-                required 
+              <input
+                type="password"
+                name="pin"
+                required
                 placeholder="Enter PIN"
                 className="w-full bg-[#0F0F11] border border-[#2A2A34] rounded-xl px-3.5 py-2.5 text-sm text-[#F0F0F2] focus:outline-none focus:border-[#F27A1A]"
               />
@@ -139,10 +158,10 @@ export default function AdminPage() {
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#A0A0AA] mb-1">
                 Player Name
               </label>
-              <input 
-                type="text" 
-                name="name" 
-                required 
+              <input
+                type="text"
+                name="name"
+                required
                 placeholder="e.g. Budi Santoso"
                 className="w-full bg-[#0F0F11] border border-[#2A2A34] rounded-xl px-3.5 py-2.5 text-sm text-[#F0F0F2] focus:outline-none focus:border-[#F27A1A]"
               />
@@ -153,16 +172,16 @@ export default function AdminPage() {
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#A0A0AA] mb-1">
                 Region
               </label>
-              <select 
-                name="region" 
-                defaultValue="Tangerang"
-                className="w-full bg-[#0F0F11] border border-[#2A2A34] rounded-xl px-3.5 py-2.5 text-sm text-[#F0F0F2] focus:outline-none focus:border-[#F27A1A]"
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                className="..."
               >
-                <option value="Tangerang">Tangerang</option>
-                <option value="DKI Jakarta">DKI Jakarta</option>
-                <option value="Bogor">Bogor</option>
-                <option value="Depok">Depok</option>
-                <option value="Bekasi">Bekasi</option>
+                {REGIONS.map((r) => (
+                  <option key={r.code} value={r.code}>
+                    {r.name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -171,17 +190,17 @@ export default function AdminPage() {
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#A0A0AA] mb-1">
                 Starting Points / Rating
               </label>
-              <input 
-                type="number" 
-                name="points" 
-                defaultValue={1000} 
-                required 
+              <input
+                type="number"
+                name="points"
+                defaultValue={1000}
+                required
                 className="w-full bg-[#0F0F11] border border-[#2A2A34] rounded-xl px-3.5 py-2.5 text-sm text-[#F0F0F2] focus:outline-none focus:border-[#F27A1A]"
               />
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="w-full bg-[#F27A1A] hover:bg-[#FF8C2E] text-[#0F0F11] font-bold py-3 rounded-xl text-sm transition-colors mt-2"
             >
               Add Player

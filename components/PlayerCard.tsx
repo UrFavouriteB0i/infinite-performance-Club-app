@@ -1,5 +1,7 @@
 "use client";
 
+import { REGION_MAP } from "@/lib/constants";
+
 export interface Player {
   id?: string;
   name: string;
@@ -69,7 +71,7 @@ export default function PlayerCard({ player, rank, isTop3, animationIndex }: Pla
               <VerifiedBadge />
             </div>
             {player.region && (
-              <span className="text-[11px] sm:text-xs block" style={{ color: "var(--text-muted)" }}>{player.region}</span>
+              <span className="text-[11px] sm:text-xs block" style={{ color: "var(--text-muted)" }}>{REGION_MAP[player.region as keyof typeof REGION_MAP]}</span>
             )}
           </div>
           

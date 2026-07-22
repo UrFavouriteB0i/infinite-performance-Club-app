@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import PlayerCard, { Player, VerifiedBadge } from "@/components/PlayerCard";
+import { REGION_MAP } from "@/lib/constants";
 
 interface LeaderboardViewProps {
   initialPlayers: any[];
@@ -10,7 +11,7 @@ interface LeaderboardViewProps {
 export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps) {
   const [playersData] = useState<Player[]>(initialPlayers);
   const [theme, setTheme] = useState("dark");
-  const [activeRegion, setActiveRegion] = useState("Tangerang");
+  const [activeRegion, setActiveRegion] = useState("TGR");
   const [activeSport, setActiveSport] = useState("Tennis");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentRankPanel, setCurrentRankPanel] = useState(0);
@@ -193,12 +194,16 @@ export default function LeaderboardView({ initialPlayers }: LeaderboardViewProps
           {/* REGION */}
           <section className="mb-6 order-2">
             <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-muted)" }}>Region</label>
-            <select value={activeRegion} className="region-dropdown" onChange={selectRegion}>
-              <option value="Tangerang">Tangerang</option>
-              <option value="DKI Jakarta">DKI Jakarta</option>
-              <option value="Bogor">Bogor</option>
-              <option value="Depok">Depok</option>
-              <option value="Bekasi">Bekasi</option>
+            <select
+              value={activeRegion}
+              className="region-dropdown"
+              onChange={selectRegion}
+            >
+              {Object.entries(REGION_MAP).map(([code, name]) => (
+                <option key={code} value={code}>
+                  {name}
+                </option>
+              ))}
             </select>
           </section>
 
