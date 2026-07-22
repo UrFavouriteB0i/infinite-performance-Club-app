@@ -56,10 +56,14 @@ export default function AdminPage() {
                 <select
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
-                  className="..."
+                  className="w-full bg-[#0F0F11] border border-[#2A2A34] rounded-xl px-3.5 py-2.5 text-sm text-[#F0F0F2] focus:outline-none focus:border-[#F27A1A]"
                 >
                   {REGIONS.map((r) => (
-                    <option key={r.code} value={r.code}>
+                    <option
+                      key={r.code}
+                      value={r.code}
+                      className="bg-[#17171B] text-[#F0F0F2]"
+                    >
                       {r.name}
                     </option>
                   ))}
@@ -173,12 +177,17 @@ export default function AdminPage() {
                 Region
               </label>
               <select
+                name="region"
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="..."
+                className="w-full bg-[#0F0F11] border border-[#2A2A34] rounded-xl px-3.5 py-2.5 text-sm text-[#F0F0F2] focus:outline-none focus:border-[#F27A1A]"
               >
                 {REGIONS.map((r) => (
-                  <option key={r.code} value={r.code}>
+                  <option
+                    key={r.code}
+                    value={r.code}
+                    className="bg-[#17171B] text-[#F0F0F2]"
+                  >
                     {r.name}
                   </option>
                 ))}
